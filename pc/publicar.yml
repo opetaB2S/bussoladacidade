@@ -1,3 +1,4 @@
+# Executa pela main protegida; os bytes do pacote são preservados por .gitattributes.
 name: Publicar coleta aprovada do PC
 run-name: Publicar coleta ${{ inputs.source_sha || 'mais recente' }}
 on:
