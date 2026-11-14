@@ -8,12 +8,15 @@ on:
 permissions:
   contents: read
   actions: read
+defaults:
+  run:
+    shell: bash
 concurrency:
   group: bussola-publicacao
   cancel-in-progress: false
 jobs:
   coletar:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4

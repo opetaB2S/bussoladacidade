@@ -40,7 +40,9 @@ def validate(old, candidate, rows):
     require(len(d['classificacao']['tipos'])==10 and all(t['completa_no_periodo'] and t['quantidade']>0 for t in d['classificacao']['tipos']), 'Tipo de documento ausente/incompleto')
     require(sum(t['quantidade'] for t in d['classificacao']['tipos'])==len(rows), 'Contagem por tipo diverge')
     require(dict(collections.Counter(r['grupo'] for r in rows))==d['classificacao']['por_grupo'], 'Grupos não fecham')
-    require(all(r['ementa'].strip() and r['autores_fonte'].strip() for r in rows), 'Documento sem ementa/autoria')
+    require(all(r['autores_fonte'].strip() for r in rows), 'Documento sem autoria')
+    known_empty={key for key,r in oldrows.items() if not r['ementa'].strip()}
+    require({r['id'] for r in rows if not r['ementa'].strip()}<=known_empty, 'Novo documento sem resumo: revisar fonte')
     require('\ufffd' not in json.dumps(d,ensure_ascii=False)+json.dumps(rows,ensure_ascii=False), 'Erro de codificação')
     for r in rows+d['pessoas']+d['frequencia']+d['votacoes']:
         require(urlparse(r['fonte']).hostname in ('www.camara.rio','aplicnt.camara.rj.gov.br'), 'Fonte não oficial')
