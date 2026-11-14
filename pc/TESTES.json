@@ -1,0 +1,16 @@
+{
+  "pacote_real_aprovado": true,
+  "pacote_alterado_bloqueado": true,
+  "cadastro_incompleto_bloqueado": true,
+  "documento_desaparecido_bloqueado": true,
+  "tls_invalido_bloqueado": true,
+  "instalacao_conta_isolada_bloqueada": true,
+  "tarefa_instalada": false,
+  "publicacao_testada": false,
+  "dados": {
+    "vereadores": 51,
+    "documentos": 62271,
+    "votacoes": 17,
+    "votos": 497
+  }
+}

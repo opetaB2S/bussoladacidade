@@ -1,75 +1,32 @@
-name: Coletar, conferir e publicar
+name: Publicar coleta aprovada do PC
 on:
-  workflow_dispatch:
   push:
-    branches: [main]
-  schedule:
-    - cron: '37 6 * * *' # 03:37 no Rio (UTC-3)
+    branches: [site-publicado]
+  workflow_dispatch:
 permissions:
   contents: read
-  actions: read
-defaults:
-  run:
-    shell: bash
+  pages: write
+  id-token: write
 concurrency:
   group: bussola-publicacao
   cancel-in-progress: false
 jobs:
-  coletar:
-    runs-on: macos-latest
-    timeout-minutes: 90
+  publicar:
+    if: github.ref == 'refs/heads/site-publicado'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - name: Completar cadeia TLS sem desativar validação
-        run: |
-          python scripts/preparar_tls.py
-          echo "REQUESTS_CA_BUNDLE=$GITHUB_WORKSPACE/data/ca-completa.pem" >> "$GITHUB_ENV"
-      - name: Restaurar base inicial
-        run: python scripts/restaurar_base.py
-      - name: Testar travas antes de coletar
-        run: python scripts/test_travas.py
-      - name: Recuperar última versão publicada para comparação
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          python scripts/recuperar_ultima.py
-      - name: Coletar novamente e validar candidato isolado
-        run: python scripts/atualizar.py
-      - name: Guardar relatório mesmo quando falhar
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: conferencia-${{ github.run_id }}
-          path: reports/
-          retention-days: 30
-      - name: Guardar candidato aprovado
-        uses: actions/upload-artifact@v4
-        with:
-          name: ultima-versao-boa
-          path: .candidate/dist/
-          retention-days: 90
+      - name: Conferir integridade e aprovação do pacote recebido
+        run: python verificar_pacote.py dist
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: .candidate/dist
-  publicar:
-    needs: coletar
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-      actions: read
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - name: Publicar somente candidato aprovado
-        id: deployment
-        uses: actions/deploy-pages@v4
+          path: dist
+      - uses: actions/deploy-pages@v4
+        id: deploy
