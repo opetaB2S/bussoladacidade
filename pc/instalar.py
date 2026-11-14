@@ -55,4 +55,7 @@ if __name__=='__main__':
     except Exception as e:
         print('\nINSTALAÇÃO/TESTE NÃO CONCLUÍDO:',e)
         print('Nenhum sucesso de publicação deve ser presumido. Veja estado.json e logs, quando existirem.')
+        status=ROOT/'estado.json'
+        if status.exists():
+            print('Motivo registrado:',json.loads(status.read_text(encoding='utf8')).get('erro','Veja o arquivo estado.json.'))
         sys.exit(1)

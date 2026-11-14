@@ -69,11 +69,12 @@ def main():
         sha=git('rev-parse','HEAD',cwd=checkout,capture=True).stdout.strip()
         git('push','origin','HEAD:refs/heads/'+BRANCH,cwd=checkout)
         state['commit']=sha;write_status(state)
-        # Do not advance the local baseline until the exact commit has deployed.
+        api('repos/'+REPO+'/actions/workflows/atualizar.yml/dispatches','--method','POST','-f','ref=main','-f','inputs[source_sha]='+sha)
+        # The workflow runs on protected main, checking out this exact package commit.
         deadline=time.monotonic()+1800;url=None
         while time.monotonic()<deadline:
-            rows=json.loads(api('repos/'+REPO+'/actions/runs?head_sha='+sha+'&event=push'))['workflow_runs']
-            matching=[r for r in rows if r['path']=='.github/workflows/atualizar.yml']
+            rows=json.loads(api('repos/'+REPO+'/actions/workflows/atualizar.yml/runs?event=workflow_dispatch&branch=main&per_page=20'))['workflow_runs']
+            matching=[r for r in rows if r['path']=='.github/workflows/atualizar.yml' and r['head_branch']=='main' and r['display_title']=='Publicar coleta '+sha]
             if matching:
                 job=matching[0];state['execucao_github']=job['html_url'];write_status(state)
                 if job['status']=='completed':

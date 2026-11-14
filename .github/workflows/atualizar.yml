@@ -1,8 +1,15 @@
 name: Publicar coleta aprovada do PC
+run-name: Publicar coleta ${{ inputs.source_sha || 'mais recente' }}
 on:
   push:
-    branches: [site-publicado]
+    branches: [main]
+    paths: ['.github/workflows/atualizar.yml']
   workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Commit do pacote aprovado na branch site-publicado
+        required: true
+        type: string
 permissions:
   contents: read
   pages: write
@@ -12,21 +19,32 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publicar:
-    if: github.ref == 'refs/heads/site-publicado'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: codigo
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha || 'site-publicado' }}
+          path: pacote
+      - name: Confirmar que o commit pertence à branch de pacotes
+        working-directory: pacote
+        run: |
+          git fetch origin site-publicado
+          git merge-base --is-ancestor HEAD FETCH_HEAD
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Conferir integridade e aprovação do pacote recebido
-        run: python verificar_pacote.py dist
+      - name: Conferir pacote com o verificador da main
+        run: python codigo/pc/verificar_pacote.py pacote/dist
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: pacote/dist
       - uses: actions/deploy-pages@v4
         id: deploy
