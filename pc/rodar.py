@@ -53,7 +53,9 @@ def main():
             git('fetch','origin',BRANCH,cwd=checkout)
             git('checkout','-B',BRANCH,'FETCH_HEAD',cwd=checkout)
         else:
-            git('checkout','--orphan',BRANCH,cwd=checkout)
+            local=git('branch','--list',BRANCH,cwd=checkout,capture=True).stdout.strip()
+            if local:git('checkout',BRANCH,cwd=checkout)
+            else:git('checkout','--orphan',BRANCH,cwd=checkout)
         dest=checkout/'dist'
         if dest.exists():
             if dest.resolve().parent!=checkout.resolve():raise ValueError('Destino fora do checkout')
