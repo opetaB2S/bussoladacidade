@@ -7,6 +7,11 @@ from pathlib import Path
 from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+SESSION=requests.Session()
+SESSION.headers['User-Agent']='BussolaDaCidade/1.0 (+https://github.com/opetab2s/bussoladacidade)'
+SESSION.mount('https://',HTTPAdapter(max_retries=Retry(total=3,backoff_factor=2,status_forcelist=[429,500,502,503,504],allowed_methods=['GET','POST'])))
 
 ap=argparse.ArgumentParser();ap.add_argument('--diagnostico-sem-validar-tls',action='store_true');args=ap.parse_args()
 ROOT=Path(__file__).resolve().parents[1]; RAW=ROOT/'data'/'originais';RAW.mkdir(parents=True,exist_ok=True)
@@ -19,7 +24,7 @@ def get(key,url,data=None):
     path=RAW/(key+'.html')
     if path.exists(): b=path.read_bytes();cached=True
     else:
-        r=requests.request('POST' if data else 'GET',url,data=data,timeout=55,verify=not args.diagnostico_sem_validar_tls);r.raise_for_status();b=r.content;path.write_bytes(b);cached=False
+        r=SESSION.request('POST' if data else 'GET',url,data=data,timeout=55,verify=not args.diagnostico_sem_validar_tls);r.raise_for_status();b=r.content;path.write_bytes(b);cached=False
     log.append({'arquivo':path.name,'url':url,'metodo':'POST' if data else 'GET','parametros':data,'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b),'cache_reutilizado':cached,'tls_validado':not args.diagnostico_sem_validar_tls})
     return BeautifulSoup(b,'html.parser')
 def norm(s):return re.sub(r'[^a-z0-9]+',' ',unicodedata.normalize('NFKD',s).encode('ascii','ignore').decode().lower()).strip()

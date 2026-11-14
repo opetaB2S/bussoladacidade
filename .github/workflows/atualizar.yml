@@ -21,6 +21,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - name: Completar cadeia TLS sem desativar validação
+        run: |
+          python scripts/preparar_tls.py
+          echo "REQUESTS_CA_BUNDLE=$GITHUB_WORKSPACE/data/ca-completa.pem" >> "$GITHUB_ENV"
       - name: Restaurar base inicial
         run: python scripts/restaurar_base.py
       - name: Testar travas antes de coletar

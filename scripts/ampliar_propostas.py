@@ -7,6 +7,11 @@ from pathlib import Path
 from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+SESSION=requests.Session()
+SESSION.headers['User-Agent']='BussolaDaCidade/1.0 (+https://github.com/opetab2s/bussoladacidade)'
+SESSION.mount('https://',HTTPAdapter(max_retries=Retry(total=3,backoff_factor=2,status_forcelist=[429,500,502,503,504],allowed_methods=['GET','POST'])))
 from classificar import classify,normalize,VERSION,GROUPS
 ap=argparse.ArgumentParser();ap.add_argument('--diagnostico-sem-validar-tls',action='store_true');opt=ap.parse_args()
 ROOT=Path(__file__).resolve().parents[1];RAW=ROOT/'data'/'propostas_originais';RAW.mkdir(parents=True,exist_ok=True)
@@ -23,7 +28,7 @@ def fetch(key,url):
  else:
   for attempt in range(3):
    try:
-    r=requests.get(url,verify=not opt.diagnostico_sem_validar_tls,timeout=60);r.raise_for_status();b=r.content;p.write_bytes(b);break
+    r=SESSION.get(url,verify=not opt.diagnostico_sem_validar_tls,timeout=60);r.raise_for_status();b=r.content;p.write_bytes(b);break
    except requests.RequestException:
     if attempt==2:raise
   cached=False
