@@ -12,3 +12,7 @@ with zipfile.ZipFile(io.BytesIO(payload)) as z:
         raise ValueError('Caminho fora do diretório da base')
     z.extractall(target)
 print('Versão inicial restaurada com hash verificado.')
+
+import shutil
+for asset in (root/"web").glob("*.js"):
+    shutil.copy2(asset,target/asset.name)

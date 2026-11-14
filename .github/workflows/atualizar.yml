@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   coletar:
-    runs-on: windows-latest
+    runs-on: macos-latest
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4

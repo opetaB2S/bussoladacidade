@@ -6,7 +6,9 @@ O fluxo `.github/workflows/atualizar.yml` está preparado para rodar às **03:37
 
 ## Estado da entrega
 
-Fluxo preparado localmente, ainda sem envio/ativação por falta de autenticação GitHub nesta sessão. A execução real local de 14/11/2026 foi bloqueada na primeira conexão com a Câmara por falha de validação do certificado HTTPS. Não houve uma coleta nova completa nem uma publicação bem-sucedida. Não se desativa TLS para contornar isso. O relatório e o log acompanham esta entrega.
+Projeto enviado ao GitHub. A agenda está registrada no workflow. As primeiras execuções nos servidores Linux e Windows do GitHub falharam por timeout/conexão encerrada pela Câmara, mantendo a publicação bloqueada. Está sendo testado o ambiente macOS. Localmente, a cadeia TLS foi completada com o intermediário da Sectigo, verificado contra as raízes do certifi; a coleta nova retornou 51 vereadores, 62.271 documentos, 17 votações e 497 votos e passou pela validação dos dados. Ainda falta comprovar a publicação e a rotina completa no GitHub.
+
+A base inicial é armazenada comprimida em `.baseline/snapshot.part*`, com SHA-256 conferido antes da extração. Não é reutilizada como resposta de coleta; serve de comparação e fornece os recursos visuais. Os scripts e o modelo PHP ficam legíveis no repositório; `web/` contém os ajustes de interface.
 
 ## Garantias implementadas
 
@@ -15,6 +17,7 @@ Fluxo preparado localmente, ainda sem envio/ativação por falta de autenticaç�
 - Nas próximas execuções, recupera a base do artefato da última execução em que coleta **e publicação** terminaram com sucesso. Uma execução cuja publicação falhou não vira a nova base. Se esse artefato tiver expirado ou não puder ser recuperado, bloqueia.
 - Exige cadastro completo de 51 vereadores com os mesmos identificadores. Mudanças de composição exigem revisão humana.
 - Exige dez tipos de documentos, paginação concluída, nenhum documento anterior desaparecido, aumento máximo de 15% por execução e alteração de no máximo 2% (ou dez) documentos anteriores.
+- Bloqueia novos documentos sem resumo. Os oito resumos já ausentes na base original permanecem identificados como não informados; não se inventa o texto.
 - Confere grupos, fontes oficiais, fotos, autores identificados, codificação, contas de faltas e abonos, ausência de redução nas tabelas mensais já disponíveis, votos duplicados ou sem nome confirmado e perda de votações do mesmo mês. Novas inconsistências nas votações bloqueiam; a pendência já documentada continua excluída.
 - Os votos coletados cobrem o mês corrente até a coleta, com esse limite exibido. Não constituem todo o mandato. Não calcula presença efetiva.
 - Falha de conexão, certificado, interpretação, contagem, geração ou recuperação encerra a execução sem executar o trabalho de publicação. O GitHub Pages conserva o último deploy bem-sucedido.
