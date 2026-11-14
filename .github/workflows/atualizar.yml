@@ -1,0 +1,68 @@
+name: Coletar, conferir e publicar
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '37 6 * * *' # 03:37 no Rio (UTC-3)
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: bussola-publicacao
+  cancel-in-progress: false
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Restaurar base inicial
+        run: python scripts/restaurar_base.py
+      - name: Testar travas antes de coletar
+        run: python scripts/test_travas.py
+      - name: Recuperar última versão publicada para comparação
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/recuperar_ultima.py
+      - name: Coletar novamente e validar candidato isolado
+        run: python scripts/atualizar.py
+      - name: Guardar relatório mesmo quando falhar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conferencia-${{ github.run_id }}
+          path: reports/
+          retention-days: 30
+      - name: Guardar candidato aprovado
+        uses: actions/upload-artifact@v4
+        with:
+          name: ultima-versao-boa
+          path: .candidate/dist/
+          retention-days: 90
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: .candidate/dist
+  publicar:
+    needs: coletar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      actions: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Publicar somente candidato aprovado
+        id: deployment
+        uses: actions/deploy-pages@v4
