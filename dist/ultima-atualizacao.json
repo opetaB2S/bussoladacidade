@@ -1,12 +1,12 @@
 {
-  "iniciado_em": "2026-11-15T06:37:12.447869+00:00",
+  "iniciado_em": "2026-11-16T06:37:16.422928+00:00",
   "publicavel": true,
-  "base_sha256_antes": "0eac913c4e9578deca1f9e5accd5ea6db0e532ba40663dbc9cb10c970b4bb82b",
+  "base_sha256_antes": "33df3cb02a2ea3e53adda5bd3e68a5ecd72e34db0b572a12e9ead93a05f4b55f",
   "vereadores": 51,
   "documentos": 62271,
   "votacoes": 17,
   "votos": 497,
-  "dados_sha256": "5cfa048c28daaa6a4ceac72c78353ea9b77f664228993f15206915c5e242f1f6",
-  "base_sha256_depois": "0eac913c4e9578deca1f9e5accd5ea6db0e532ba40663dbc9cb10c970b4bb82b",
+  "dados_sha256": "458f8553d5b5123f7edabc0dca0229049bde4a15f8e61bc5f3002da9c013686b",
+  "base_sha256_depois": "33df3cb02a2ea3e53adda5bd3e68a5ecd72e34db0b572a12e9ead93a05f4b55f",
   "base_preservada": true
 }
